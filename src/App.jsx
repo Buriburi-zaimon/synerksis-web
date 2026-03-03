@@ -1,7 +1,7 @@
 import React, { useRef, useId, useEffect, useState } from 'react';
 import { motion, animate, useMotionValue, AnimatePresence } from 'framer-motion';
-// Added Phone icon to the import
-import { Linkedin, Mail, Hexagon, Activity, Cpu, Layers, Waves, Box, X, Phone } from 'lucide-react';
+// Added Menu icon to the import for the mobile hamburger menu
+import { Linkedin, Mail, Hexagon, Activity, Cpu, Layers, Waves, Box, X, Phone, Menu } from 'lucide-react';
 
 // =========================================
 // ETHEREAL SHADOW EFFECT COMPONENT
@@ -162,6 +162,9 @@ function EtherealBackgroundLayer({
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [enlargedImage, setEnlargedImage] = useState(null);
+  
+  // NEW: State to control the mobile navigation menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const fadeUpVariant = {
     hidden: { opacity: 0, y: 20 },
@@ -203,14 +206,17 @@ export default function App() {
         )}
       </div>
 
-      {/* --- NAVIGATION (Transparent) --- */}
-      <nav className="relative z-50 flex items-center justify-between px-8 py-8 md:px-12 lg:px-20 w-full max-w-[1600px] mx-auto bg-transparent">
+      {/* --- NAVIGATION (Responsive) --- */}
+      <nav className="relative z-50 flex items-center justify-between px-6 py-6 md:px-12 lg:px-20 w-full max-w-[1600px] mx-auto bg-transparent">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() => setCurrentPage('home')}
+          className="flex items-center gap-2 cursor-pointer z-50"
+          onClick={() => {
+            setCurrentPage('home');
+            setIsMobileMenuOpen(false); // Close menu if logo is clicked on mobile
+          }}
         >
           <Hexagon className="w-6 h-6 text-white stroke-[1.5]" />
           <span className="text-xl font-bold tracking-[0.15em] text-white uppercase mt-0.5 hover:text-gray-300 transition-colors">
@@ -218,6 +224,7 @@ export default function App() {
           </span>
         </motion.div>
 
+        {/* DESKTOP NAVIGATION */}
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -229,6 +236,42 @@ export default function App() {
           <button onClick={() => setCurrentPage('team')} className={`hover:text-white transition-colors ${currentPage === 'team' ? 'text-white font-semibold' : ''}`}>Team</button>
           <button onClick={() => setCurrentPage('contact')} className={`hover:text-white transition-colors ${currentPage === 'contact' ? 'text-white font-semibold' : ''}`}>Contact</button>
         </motion.div>
+
+        {/* MOBILE HAMBURGER BUTTON */}
+        <motion.button 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="md:hidden text-white z-50 p-2"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+        </motion.button>
+
+        {/* MOBILE NAVIGATION MENU OVERLAY */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 w-full bg-[#050505]/95 backdrop-blur-xl border-b border-white/10 flex flex-col items-center py-8 gap-8 md:hidden shadow-2xl z-40"
+            >
+              {['product', 'mission', 'team', 'contact'].map((page) => (
+                <button 
+                  key={page}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    setIsMobileMenuOpen(false); // Close menu when a link is clicked
+                  }} 
+                  className={`text-lg tracking-widest uppercase transition-colors ${currentPage === page ? 'text-white font-bold' : 'text-gray-400 hover:text-white'}`}
+                >
+                  {page}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* --- PAGE CONTENT RENDERER --- */}
@@ -240,16 +283,16 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex items-center px-8 md:px-12 lg:px-20 w-full"
+            className="flex-grow flex items-center px-6 md:px-12 lg:px-20 w-full"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 w-full gap-8 items-center h-full">
-              <div className="w-full h-[250px] md:h-[400px]"></div>
+              <div className="w-full h-[200px] sm:h-[300px] md:h-[400px]"></div>
               
               <motion.div 
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
-                className="flex flex-col items-start gap-4 max-w-xl xl:max-w-2xl lg:pl-24 xl:pl-32"
+                className="flex flex-col items-start gap-4 max-w-xl xl:max-w-2xl lg:pl-24 xl:pl-32 pb-12 lg:pb-0"
               >
                 <motion.h1 
                   variants={fadeUpVariant}
@@ -285,7 +328,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex items-center py-8 px-8 md:px-12 lg:px-20 w-full"
+            className="flex-grow flex items-center py-8 px-6 md:px-12 lg:px-20 w-full"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 w-full gap-12 lg:gap-6 items-center h-full">
               <motion.div 
@@ -299,7 +342,7 @@ export default function App() {
                   <span>Bio-Electronics & AI</span>
                 </motion.div>
 
-                <motion.h2 variants={fadeUpVariant} className="text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.1]">
+                <motion.h2 variants={fadeUpVariant} className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.1]">
                   NEXT-GENERATION <br /> KINETIC INTELLIGENCE
                 </motion.h2>
                 
@@ -323,7 +366,7 @@ export default function App() {
                   <div className="flex flex-col gap-2 p-5 rounded-2xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md">
                     <Box className="w-5 h-5 text-white mb-1" />
                     <h3 className="text-white font-semibold text-sm tracking-wide">Perfect Physical Form Factor</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">Ergonomic links engineered for day long comfort and consistent signal integrity.</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">Ergonomic links engineered for day-long comfort and consistent signal integrity.</p>
                   </div>
                   
                   <div className="flex flex-col gap-2 p-5 rounded-2xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md">
@@ -338,17 +381,17 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
-                className="flex flex-col justify-center items-center relative w-full h-[400px] md:h-[550px] lg:pl-10"
+                className="flex flex-col justify-center items-center relative w-full h-[350px] md:h-[550px] lg:pl-10"
               >
                 <motion.img
                   src="/transparent_background_myiband.png"
                   alt="MyoBand Deep Tech Wearable"
-                  className="relative z-10 w-full max-w-[450px] md:max-w-[500px] xl:max-w-[650px] object-contain drop-shadow-[0_25px_45px_rgba(0,0,0,0.9)]"
+                  className="relative z-10 w-full max-w-[350px] md:max-w-[450px] lg:max-w-[500px] xl:max-w-[650px] object-contain drop-shadow-[0_25px_45px_rgba(0,0,0,0.9)]"
                   animate={{ y: [0, -15, 0] }}
                   transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
                 />
                 <motion.div 
-                  className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[350px] md:w-[420px] xl:w-[550px] h-[15px] bg-black blur-[15px] rounded-[100%] z-0"
+                  className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[280px] md:w-[350px] lg:w-[420px] xl:w-[550px] h-[15px] bg-black blur-[15px] rounded-[100%] z-0"
                   animate={{ scale: [1, 0.85, 1], opacity: [0.8, 0.4, 0.8] }}
                   transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
                 />
@@ -363,7 +406,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex flex-col justify-center py-12 px-8 md:px-12 lg:px-20 w-full max-w-[1200px] mx-auto relative z-10"
+            className="flex-grow flex flex-col justify-center py-12 px-6 md:px-12 lg:px-20 w-full max-w-[1200px] mx-auto relative z-10"
           >
             <motion.div 
               initial="hidden"
@@ -381,7 +424,7 @@ export default function App() {
               </motion.h2>
               
               <motion.p variants={fadeUpVariant} className="text-base md:text-[18px] text-gray-400 leading-relaxed font-light max-w-3xl mt-2">
-                At Synerksis Labs, our mission is to become the premier brand in modern biomedical and AI-driven smart gesture control. We are dedicated to producing first of a kind wearable technologies that bridge the gap between human intent and digital execution.
+                At Synerksis Labs, our mission is to become the premier brand in modern biomedical and AI-driven smart gesture control. We are dedicated to producing first-of-a-kind wearable technologies that bridge the gap between human intent and digital execution.
               </motion.p>
 
               <motion.div variants={fadeUpVariant} className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8">
@@ -399,8 +442,8 @@ export default function App() {
 
                 <div className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md text-left hover:bg-black/60 transition-colors duration-500">
                   <Cpu className="w-6 h-6 text-white mb-2" />
-                  <h3 className="text-white font-semibold text-lg tracking-wide">First of a Kind Tech</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">Innovating at the intersection of AI and hardware to deliver entirely new paradigms of gesture based wearable technology.</p>
+                  <h3 className="text-white font-semibold text-lg tracking-wide">First-of-a-Kind Tech</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">Innovating at the intersection of AI and hardware to deliver entirely new paradigms of gesture-based wearable technology.</p>
                 </div>
               </motion.div>
             </motion.div>
@@ -413,7 +456,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex flex-col justify-center py-12 px-8 md:px-12 lg:px-20 w-full max-w-[1400px] mx-auto"
+            className="flex-grow flex flex-col justify-center py-12 px-6 md:px-12 lg:px-20 w-full max-w-[1400px] mx-auto"
           >
             <motion.div 
               initial="hidden"
@@ -511,7 +554,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex flex-col justify-center py-12 px-8 md:px-12 lg:px-20 w-full max-w-[1200px] mx-auto relative z-10"
+            className="flex-grow flex flex-col justify-center py-12 px-6 md:px-12 lg:px-20 w-full max-w-[1200px] mx-auto relative z-10"
           >
             <motion.div 
               initial="hidden"
@@ -538,7 +581,7 @@ export default function App() {
               className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto"
             >
               {/* Email Card */}
-              <motion.div variants={fadeUpVariant} className="flex flex-col items-center text-center gap-4 p-10 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+              <motion.div variants={fadeUpVariant} className="flex flex-col items-center text-center gap-4 p-8 md:p-10 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
                 <div className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.1] flex items-center justify-center mb-2">
                   <Mail className="w-6 h-6 text-white" />
                 </div>
@@ -550,7 +593,7 @@ export default function App() {
               </motion.div>
 
               {/* Phone Card */}
-              <motion.div variants={fadeUpVariant} className="flex flex-col items-center text-center gap-4 p-10 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+              <motion.div variants={fadeUpVariant} className="flex flex-col items-center text-center gap-4 p-8 md:p-10 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
                 <div className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.1] flex items-center justify-center mb-2">
                   <Phone className="w-6 h-6 text-white" />
                 </div>
@@ -569,20 +612,19 @@ export default function App() {
       </div>
       
       {/* --- FOOTER (Transparent) --- */}
-      <footer className="relative z-50 flex flex-col md:flex-row items-center justify-between px-8 py-8 md:px-12 lg:px-20 w-full text-gray-500 bg-transparent">
-        <div className="flex gap-6 mb-4 md:mb-0 w-full max-w-[1600px] mx-auto justify-between items-center">
+      <footer className="relative z-50 flex flex-col md:flex-row items-center justify-between px-6 py-8 md:px-12 lg:px-20 w-full text-gray-500 bg-transparent">
+        <div className="flex flex-col md:flex-row gap-6 mb-4 md:mb-0 w-full max-w-[1600px] mx-auto justify-between items-center text-center md:text-left">
           <div className="flex gap-6">
             <a href="https://www.linkedin.com/company/synerksislabs" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-white transition-colors">
               <Linkedin className="w-5 h-5" />
             </a>
             
-            {/* WIRED UP THE GLOBAL FOOTER EMAIL */}
             <a href="mailto:labssynerksis@gmail.com" aria-label="Email" className="hover:text-white transition-colors">
               <Mail className="w-5 h-5" />
             </a>
 
           </div>
-          <div className="text-right text-[13px] leading-relaxed tracking-wide">
+          <div className="text-[13px] leading-relaxed tracking-wide">
             <p>© 2026 Synerksis LABS</p>
             <p>Based in Kolkata, India</p>
           </div>
@@ -599,7 +641,7 @@ export default function App() {
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-pointer"
             onClick={() => setEnlargedImage(null)}
           >
-            <button className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors">
+            <button className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors">
               <X className="w-8 h-8" />
             </button>
 
