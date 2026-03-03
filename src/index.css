@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Base dark background to prevent flashing during load */
+body {
+  background-color: #0d0d0d;
+}
