@@ -314,27 +314,33 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex items-center px-6 md:px-12 lg:px-20 w-full"
+            className="flex-grow flex items-center px-6 md:px-12 lg:px-20 w-full pt-12 md:pt-0" // Added pt-12 for mobile to push content down
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 w-full gap-8 items-center h-full">
-              <div className="w-full h-[200px] sm:h-[300px] md:h-[400px]"></div>
+            {/* OPTIMIZED: Changed to flex-col on mobile, grid on lg screens */}
+            <div className="flex flex-col lg:grid lg:grid-cols-2 w-full gap-8 lg:gap-8 items-center h-full">
+              
+              {/* This div acts as a spacer for the background image. On mobile, we give it a specific height so the text isn't drawn over the focal point. */}
+              <div className="w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[400px]"></div>
               
               <motion.div 
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
-                className="flex flex-col items-start gap-4 max-w-xl xl:max-w-2xl lg:pl-24 xl:pl-32 pb-12 lg:pb-0"
+                // OPTIMIZED: Adjusted padding and text alignment for mobile
+                className="flex flex-col items-start gap-4 w-full max-w-xl xl:max-w-2xl lg:pl-24 xl:pl-32 pb-12 lg:pb-0"
               >
                 <motion.h1 
                   variants={fadeUpVariant}
-                  className="text-5xl lg:text-[56px] xl:text-[64px] font-bold text-white tracking-tight leading-[1.1] uppercase"
+                  // Reduced text size slightly on mobile (text-4xl) to prevent wrapping issues
+                  className="text-4xl md:text-5xl lg:text-[56px] xl:text-[64px] font-bold text-white tracking-tight leading-[1.1] uppercase drop-shadow-lg"
                 >
                   UNLOCK YOUR POTENTIAL
                 </motion.h1>
                 
                 <motion.p 
                   variants={fadeUpVariant}
-                  className="text-base md:text-[17px] text-gray-400 leading-relaxed font-light mt-2 max-w-[90%]"
+                  // Added a text shadow to ensure readability even if it slightly overlaps a lighter part of the background
+                  className="text-base md:text-[17px] text-gray-300 leading-relaxed font-light mt-2 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                 >
                   Introducing the Myoband: Advanced Biometric Feedback & Control
                 </motion.p>
@@ -344,7 +350,7 @@ export default function App() {
                   variants={fadeUpVariant}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="mt-4 px-8 py-3.5 bg-white text-black text-[13px] font-bold tracking-[0.1em] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all uppercase cursor-pointer"
+                  className="mt-6 px-8 py-3.5 bg-white text-black text-[13px] font-bold tracking-[0.1em] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all uppercase cursor-pointer"
                 >
                   LEARN MORE
                 </motion.button>
@@ -381,7 +387,7 @@ export default function App() {
                   The MyoBand is a cutting-edge deep tech wearable engineered to capture precise biometric signals. Designed for ultimate versatility, it adapts to your body worn seamlessly on the arms or legs to track high-fidelity kinetic data. 
                 </motion.p>
 
-                <motion.div variants={fadeUpVariant} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 w-full">
+                <motion.div variants={fadeUpVariant} className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 w-full">
                   <div className="flex flex-col gap-2 p-5 rounded-2xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md">
                     <Waves className="w-5 h-5 text-white mb-1" />
                     <h3 className="text-white font-semibold text-sm tracking-wide">Gesture Control</h3>
