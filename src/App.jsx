@@ -21,6 +21,26 @@ const useInstanceId = () => {
   return `shadowoverlay-${cleanId}`;
 };
 
+// NEW: Hook to detect if we are on a mobile screen
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is the typical 'md' breakpoint in Tailwind
+    };
+    
+    // Check initially
+    checkMobile();
+    
+    // Add listener for window resize
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return isMobile;
+}
+
 function EtherealBackgroundLayer({ 
   sizing = 'fill',
   color = 'rgba(128, 128, 128, 1)', 
@@ -29,12 +49,17 @@ function EtherealBackgroundLayer({
   className
 }) {
   const id = useInstanceId();
-  const animationEnabled = animation && animation.scale > 0;
+  const isMobile = useIsMobile();
+  
+  // Stop animation if scale is 0 OR if we are on a mobile device to save CPU/Battery
+  const animationEnabled = animation && animation.scale > 0 && !isMobile; 
+  
   const feColorMatrixRef = useRef(null);
   const hueRotateMotionValue = useMotionValue(180);
   const hueRotateAnimation = useRef(null);
 
-  const displacementScale = animation ? mapRange(animation.scale, 1, 100, 20, 100) : 0;
+  // If mobile, keep displacement at 0 to avoid rendering the heavy filter if not animating
+  const displacementScale = animationEnabled ? mapRange(animation.scale, 1, 100, 20, 100) : 0;
   const animationDuration = animation ? mapRange(animation.speed, 1, 100, 1000, 50) : 1;
 
   useEffect(() => {
@@ -62,6 +87,9 @@ function EtherealBackgroundLayer({
           hueRotateAnimation.current.stop();
         }
       };
+    } else if (hueRotateAnimation.current) {
+         // Ensure we stop the animation if we switch from desktop to mobile
+         hueRotateAnimation.current.stop();
     }
   }, [animationEnabled, animationDuration, hueRotateMotionValue]);
 
@@ -82,7 +110,9 @@ function EtherealBackgroundLayer({
         style={{
           position: "absolute",
           inset: -displacementScale,
-          filter: animationEnabled ? `url(#${id}) blur(4px)` : "none"
+          // Only apply the blur and filter if animation is enabled (desktop)
+          filter: animationEnabled ? `url(#${id}) blur(4px)` : "blur(2px)",
+          transition: "filter 0.5s ease" // Smooth transition if resizing
         }}
       >
         {animationEnabled && (
@@ -138,6 +168,7 @@ function EtherealBackgroundLayer({
         />
       </div>
 
+      {/* Textured Noise Overlay remains active on all devices */}
       {noise && noise.opacity > 0 && (
         <div
           style={{
@@ -163,7 +194,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [enlargedImage, setEnlargedImage] = useState(null);
   
-  // NEW: State to control the mobile navigation menu
+  // State to control the mobile navigation menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const fadeUpVariant = {
