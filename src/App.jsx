@@ -314,24 +314,20 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex-grow flex items-center px-6 md:px-12 lg:px-20 w-full pt-12 md:pt-0" // Added pt-12 for mobile to push content down
+            className="flex-grow flex items-center px-6 md:px-12 lg:px-20 w-full pt-12 md:pt-0"
           >
-            {/* OPTIMIZED: Changed to flex-col on mobile, grid on lg screens */}
             <div className="flex flex-col lg:grid lg:grid-cols-2 w-full gap-8 lg:gap-8 items-center h-full">
               
-              {/* This div acts as a spacer for the background image. On mobile, we give it a specific height so the text isn't drawn over the focal point. */}
               <div className="w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[400px]"></div>
               
               <motion.div 
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
-                // OPTIMIZED: Adjusted padding and text alignment for mobile
                 className="flex flex-col items-start gap-4 w-full max-w-xl xl:max-w-2xl lg:pl-24 xl:pl-32 pb-12 lg:pb-0"
               >
                 <motion.h1 
                   variants={fadeUpVariant}
-                  // Reduced text size slightly on mobile (text-4xl) to prevent wrapping issues
                   className="text-4xl md:text-5xl lg:text-[56px] xl:text-[64px] font-bold text-white tracking-tight leading-[1.1] uppercase drop-shadow-lg"
                 >
                   UNLOCK YOUR POTENTIAL
@@ -339,8 +335,8 @@ export default function App() {
                 
                 <motion.p 
                   variants={fadeUpVariant}
-                  // Added a text shadow to ensure readability even if it slightly overlaps a lighter part of the background
-                  className="text-base md:text-[17px] text-gray-300 leading-relaxed font-light mt-2 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                  // FIX: Added a mobile-only frosted glass background (bg-black/40, backdrop-blur-md) so the thin text is perfectly legible over the bright image. Reverts to transparent on PC.
+                  className="text-[15px] md:text-[17px] text-white md:text-gray-300 leading-relaxed font-medium md:font-light mt-2 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-black/40 md:bg-transparent backdrop-blur-md md:backdrop-blur-none p-3 md:p-0 rounded-xl md:rounded-none border border-white/10 md:border-transparent"
                 >
                   Introducing the Myoband: Advanced Biometric Feedback & Control
                 </motion.p>
@@ -350,7 +346,7 @@ export default function App() {
                   variants={fadeUpVariant}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="mt-6 px-8 py-3.5 bg-white text-black text-[13px] font-bold tracking-[0.1em] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all uppercase cursor-pointer"
+                  className="mt-4 md:mt-6 px-8 py-3.5 bg-white text-black text-[13px] font-bold tracking-[0.1em] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all uppercase cursor-pointer"
                 >
                   LEARN MORE
                 </motion.button>
