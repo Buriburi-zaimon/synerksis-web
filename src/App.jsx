@@ -180,7 +180,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-[#050505] text-gray-200 font-sans selection:bg-white/20">
+    <div className="relative min-h-screen flex flex-col bg-[#050505] text-gray-200 font-sans selection:bg-white/20 overflow-x-hidden">
       
       {/* --- GLOBAL FIXED BACKGROUND --- */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
@@ -611,7 +611,7 @@ export default function App() {
 
       </div>
       
-      {/* --- FOOTER (Transparent) --- */}
+      {/* --- FOOTER (Responsive Layout) --- */}
       <footer className="relative z-50 flex flex-col md:flex-row items-center justify-between px-6 py-8 md:px-12 lg:px-20 w-full text-gray-500 bg-transparent">
         <div className="flex flex-col md:flex-row gap-6 mb-4 md:mb-0 w-full max-w-[1600px] mx-auto justify-between items-center text-center md:text-left">
           <div className="flex gap-6">
@@ -641,7 +641,7 @@ export default function App() {
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-pointer"
             onClick={() => setEnlargedImage(null)}
           >
-            <button className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors">
+            <button className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors z-[101]">
               <X className="w-8 h-8" />
             </button>
 
