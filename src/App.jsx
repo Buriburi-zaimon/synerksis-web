@@ -1,7 +1,6 @@
 import React, { useRef, useId, useEffect, useState } from 'react';
 import { motion, animate, useMotionValue, AnimatePresence } from 'framer-motion';
-// Added Menu icon to the import for the mobile hamburger menu
-import { Linkedin, Mail, Hexagon, Activity, Cpu, Layers, Waves, Box, X, Phone, Menu } from 'lucide-react';
+import { Linkedin, Mail, Activity, Cpu, Layers, Waves, Box, X, Phone, Menu } from 'lucide-react';
 
 // =========================================
 // ETHEREAL SHADOW EFFECT COMPONENT
@@ -21,19 +20,16 @@ const useInstanceId = () => {
   return `shadowoverlay-${cleanId}`;
 };
 
-// NEW: Hook to detect if we are on a mobile screen
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is the typical 'md' breakpoint in Tailwind
+      setIsMobile(window.innerWidth < 768); 
     };
     
-    // Check initially
     checkMobile();
     
-    // Add listener for window resize
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -51,14 +47,12 @@ function EtherealBackgroundLayer({
   const id = useInstanceId();
   const isMobile = useIsMobile();
   
-  // Stop animation if scale is 0 OR if we are on a mobile device to save CPU/Battery
   const animationEnabled = animation && animation.scale > 0 && !isMobile; 
   
   const feColorMatrixRef = useRef(null);
   const hueRotateMotionValue = useMotionValue(180);
   const hueRotateAnimation = useRef(null);
 
-  // If mobile, keep displacement at 0 to avoid rendering the heavy filter if not animating
   const displacementScale = animationEnabled ? mapRange(animation.scale, 1, 100, 20, 100) : 0;
   const animationDuration = animation ? mapRange(animation.speed, 1, 100, 1000, 50) : 1;
 
@@ -88,7 +82,6 @@ function EtherealBackgroundLayer({
         }
       };
     } else if (hueRotateAnimation.current) {
-         // Ensure we stop the animation if we switch from desktop to mobile
          hueRotateAnimation.current.stop();
     }
   }, [animationEnabled, animationDuration, hueRotateMotionValue]);
@@ -110,9 +103,8 @@ function EtherealBackgroundLayer({
         style={{
           position: "absolute",
           inset: -displacementScale,
-          // Only apply the blur and filter if animation is enabled (desktop)
           filter: animationEnabled ? `url(#${id}) blur(4px)` : "blur(2px)",
-          transition: "filter 0.5s ease" // Smooth transition if resizing
+          transition: "filter 0.5s ease" 
         }}
       >
         {animationEnabled && (
@@ -168,7 +160,6 @@ function EtherealBackgroundLayer({
         />
       </div>
 
-      {/* Textured Noise Overlay remains active on all devices */}
       {noise && noise.opacity > 0 && (
         <div
           style={{
@@ -193,8 +184,6 @@ function EtherealBackgroundLayer({
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [enlargedImage, setEnlargedImage] = useState(null);
-  
-  // State to control the mobile navigation menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const fadeUpVariant = {
@@ -237,25 +226,24 @@ export default function App() {
         )}
       </div>
 
-      {/* --- NAVIGATION (Responsive) --- */}
+      {/* --- NAVIGATION --- */}
       <nav className="relative z-50 flex items-center justify-between px-6 py-6 md:px-12 lg:px-20 w-full max-w-[1600px] mx-auto bg-transparent">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex items-center gap-2 cursor-pointer z-50"
+          className="flex items-center gap-3 cursor-pointer z-50"
           onClick={() => {
             setCurrentPage('home');
-            setIsMobileMenuOpen(false); // Close menu if logo is clicked on mobile
+            setIsMobileMenuOpen(false); 
           }}
         >
-          <Hexagon className="w-6 h-6 text-white stroke-[1.5]" />
-          <span className="text-xl font-bold tracking-[0.15em] text-white uppercase mt-0.5 hover:text-gray-300 transition-colors">
+          <img src="/Design_1.png" alt="Synerksis Labs Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
+          <span className="text-xl md:text-2xl font-bold tracking-[0.15em] text-white uppercase mt-0.5 hover:text-gray-300 transition-colors">
             Synerksis Labs
           </span>
         </motion.div>
 
-        {/* DESKTOP NAVIGATION */}
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -264,11 +252,12 @@ export default function App() {
         >
           <button onClick={() => setCurrentPage('product')} className={`hover:text-white transition-colors ${currentPage === 'product' ? 'text-white font-semibold' : ''}`}>Product</button>
           <button onClick={() => setCurrentPage('mission')} className={`hover:text-white transition-colors ${currentPage === 'mission' ? 'text-white font-semibold' : ''}`}>Mission</button>
+          {/* ADDED MILESTONES TO DESKTOP NAV */}
+          <button onClick={() => setCurrentPage('milestones')} className={`hover:text-white transition-colors ${currentPage === 'milestones' ? 'text-white font-semibold' : ''}`}>Milestones</button>
           <button onClick={() => setCurrentPage('team')} className={`hover:text-white transition-colors ${currentPage === 'team' ? 'text-white font-semibold' : ''}`}>Team</button>
           <button onClick={() => setCurrentPage('contact')} className={`hover:text-white transition-colors ${currentPage === 'contact' ? 'text-white font-semibold' : ''}`}>Contact</button>
         </motion.div>
 
-        {/* MOBILE HAMBURGER BUTTON */}
         <motion.button 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -278,7 +267,6 @@ export default function App() {
           {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
         </motion.button>
 
-        {/* MOBILE NAVIGATION MENU OVERLAY */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -288,12 +276,13 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="absolute top-full left-0 w-full bg-[#050505]/95 backdrop-blur-xl border-b border-white/10 flex flex-col items-center py-8 gap-8 md:hidden shadow-2xl z-40"
             >
-              {['product', 'mission', 'team', 'contact'].map((page) => (
+              {/* ADDED MILESTONES TO MOBILE NAV */}
+              {['product', 'mission', 'milestones', 'team', 'contact'].map((page) => (
                 <button 
                   key={page}
                   onClick={() => {
                     setCurrentPage(page);
-                    setIsMobileMenuOpen(false); // Close menu when a link is clicked
+                    setIsMobileMenuOpen(false); 
                   }} 
                   className={`text-lg tracking-widest uppercase transition-colors ${currentPage === page ? 'text-white font-bold' : 'text-gray-400 hover:text-white'}`}
                 >
@@ -335,7 +324,6 @@ export default function App() {
                 
                 <motion.p 
                   variants={fadeUpVariant}
-                  // FIX: Added a mobile-only frosted glass background (bg-black/40, backdrop-blur-md) so the thin text is perfectly legible over the bright image. Reverts to transparent on PC.
                   className="text-[15px] md:text-[17px] text-white md:text-gray-300 leading-relaxed font-medium md:font-light mt-2 w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-black/40 md:bg-transparent backdrop-blur-md md:backdrop-blur-none p-3 md:p-0 rounded-xl md:rounded-none border border-white/10 md:border-transparent"
                 >
                   Introducing the Myoband: Advanced Biometric Feedback & Control
@@ -407,6 +395,12 @@ export default function App() {
                     <h3 className="text-white font-semibold text-sm tracking-wide">Clinical Dashboard</h3>
                     <p className="text-xs text-gray-400 leading-relaxed">Dedicated interface for professionals to monitor and analyze patient metrics.</p>
                   </div>
+
+                  <div className="flex flex-col gap-2 p-5 rounded-2xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md sm:col-span-2">
+                    <Activity className="w-5 h-5 text-white mb-1" />
+                    <h3 className="text-white font-semibold text-sm tracking-wide">Athletic Performance</h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">Captures intricate muscle activation to optimize form and prevent injuries.</p>
+                  </div>
                 </motion.div>
               </motion.div>
 
@@ -448,7 +442,7 @@ export default function App() {
               className="flex flex-col items-center text-center gap-8"
             >
               <motion.div variants={fadeUpVariant} className="flex items-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase">
-                <Hexagon className="w-4 h-4" />
+                <img src="/Design_1.png" alt="Vision Icon" className="w-12 h-12 md:w-16 md:h-16 object-contain opacity-80" />
                 <span>Our Vision</span>
               </motion.div>
 
@@ -457,14 +451,14 @@ export default function App() {
               </motion.h2>
               
               <motion.p variants={fadeUpVariant} className="text-base md:text-[18px] text-gray-400 leading-relaxed font-light max-w-3xl mt-2">
-                At Synerksis Labs, our mission is to become the premier brand in modern biomedical and AI-driven smart gesture control. We are dedicated to producing first-of-a-kind wearable technologies that bridge the gap between human intent and digital execution.
+                At SYNERKSIS LABS, our mission is to pioneer the future of neuromuscular diagnostics for both medicine and high-performance sports. We build first of their kind wearable technologies that bridge the gap between the clinical lab and the athletic field, translating real-time muscle synergy and fatigue data into actionable insights for rehabilitation and peak performance.
               </motion.p>
 
               <motion.div variants={fadeUpVariant} className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8">
                 <div className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md text-left hover:bg-black/60 transition-colors duration-500">
                   <Activity className="w-6 h-6 text-white mb-2" />
                   <h3 className="text-white font-semibold text-lg tracking-wide">Clinical Diagnostics</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">Making the diagnosis and progression tracking of chronic disorders highly accessible, precise, and effortless.</p>
+                  <p className="text-sm text-gray-400 leading-relaxed">Making the diagnosis and progression tracking of chronic neuromuscular disorders highly accessible, precise, and effortless.</p>
                 </div>
                 
                 <div className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md text-left hover:bg-black/60 transition-colors duration-500">
@@ -475,15 +469,149 @@ export default function App() {
 
                 <div className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md text-left hover:bg-black/60 transition-colors duration-500">
                   <Cpu className="w-6 h-6 text-white mb-2" />
-                  <h3 className="text-white font-semibold text-lg tracking-wide">First-of-a-Kind Tech</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">Innovating at the intersection of AI and hardware to deliver entirely new paradigms of gesture-based wearable technology.</p>
+                  <h3 className="text-white font-semibold text-lg tracking-wide">First of a Kind Tech</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">Innovating at the intersection of AI and hardware to deliver entirely new paradigms of gesture and sEMG based wearable technology.</p>
                 </div>
+              </motion.div>
+
+              {/* Expanded Application: Back Pain */}
+              <motion.div variants={fadeUpVariant} className="w-full mt-12 text-left">
+                <div className="flex flex-col gap-4 p-8 rounded-3xl bg-white/[0.02] border border-white/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-white/20"></div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Activity className="w-6 h-6 text-white" />
+                    <h3 className="text-white font-bold text-xl tracking-wide uppercase">Expanded Application: Back Pain Management</h3>
+                  </div>
+                  <p className="text-[15px] md:text-base text-gray-400 leading-relaxed font-light">
+                    The core foundation of the MyoBand has always been neuromuscular rehabilitation, clinical diagnostics, and athletic enhancement. However, this same high fidelity sensing technology provides an exceptional solution for back pain management. Most back pain originates from poor posture and muscular imbalances rather than complex neuromuscular disorders. By continuously tracking muscle fatigue and spinal alignment in real time, the MyoBand acts as a powerful preventative tool. It relies entirely on passive monitoring and precise data collection without using any electrical stimulation. This approach allows users and physical therapists to clearly identify harmful strain patterns and correct them before chronic pain develops.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Project Roadmap */}
+              <motion.div variants={fadeUpVariant} className="w-full mt-20 text-left">
+                <div className="flex items-center justify-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase mb-6">
+                  <Layers className="w-4 h-4" />
+                  <span>Development Timeline</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight uppercase text-center mb-12">
+                  Project Roadmap
+                </h2>
+                
+                <div className="space-y-6 max-w-4xl mx-auto">
+                  {/* Phase 1 */}
+                  <div className="relative pl-8 md:pl-0">
+                    <div className="md:hidden absolute left-0 top-0 bottom-0 w-px bg-white/10"></div>
+                    <div className="md:hidden absolute left-[-4px] top-2 w-2 h-2 rounded-full bg-white"></div>
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md">
+                      <div className="md:w-1/3 flex-shrink-0">
+                        <h3 className="text-xl font-bold text-white">Phase 1: MVP Fabrication</h3>
+                        <p className="text-sm font-medium text-gray-500 mt-1 tracking-wider uppercase">Oct – Nov 2026</p>
+                      </div>
+                      <div className="md:w-2/3 space-y-3 text-[14px] text-gray-400 font-light leading-relaxed">
+                        <p><strong className="text-gray-200 font-semibold">What we're doing:</strong> Finishing the assembly of our core MVP. We are integrating our custom PCBs into the new fabric-based wearable bands to ensure they are comfortable and functional.</p>
+                        <p><strong className="text-gray-200 font-semibold">Focus:</strong> Ensuring the Bluetooth data flows smoothly without dropping while the user is moving, while simultaneously filtering out background noise.</p>
+                        <p><strong className="text-gray-200 font-semibold">Grant Usage:</strong> Funding goes directly toward PCB fabrication and sourcing high-quality fabric materials for the housing.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phase 2 */}
+                  <div className="relative pl-8 md:pl-0">
+                    <div className="md:hidden absolute left-0 top-0 bottom-0 w-px bg-white/10"></div>
+                    <div className="md:hidden absolute left-[-4px] top-2 w-2 h-2 rounded-full bg-white"></div>
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md">
+                      <div className="md:w-1/3 flex-shrink-0">
+                        <h3 className="text-xl font-bold text-white">Phase 2: Pilot Testing</h3>
+                        <p className="text-sm font-medium text-gray-500 mt-1 tracking-wider uppercase">Dec 2026 – Jan 2027</p>
+                      </div>
+                      <div className="md:w-2/3 space-y-3 text-[14px] text-gray-400 font-light leading-relaxed">
+                        <p><strong className="text-gray-200 font-semibold">What we're doing:</strong> Handing out a small batch of our MVP units to early testers (like researchers and physios) to use in the real world.</p>
+                        <p><strong className="text-gray-200 font-semibold">Focus:</strong> We want to see how comfortable the fabric band is for all-day wear and make sure the signal stays crystal clear outside the lab.</p>
+                        <p><strong className="text-gray-200 font-semibold">Grant Usage:</strong> Covering the costs to build these 15-20 pilot units and the cloud setup to log their testing data.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phase 3 */}
+                  <div className="relative pl-8 md:pl-0">
+                    <div className="md:hidden absolute left-0 top-0 bottom-0 w-px bg-white/10"></div>
+                    <div className="md:hidden absolute left-[-4px] top-2 w-2 h-2 rounded-full bg-white"></div>
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md">
+                      <div className="md:w-1/3 flex-shrink-0">
+                        <h3 className="text-xl font-bold text-white">Phase 3: Production</h3>
+                        <p className="text-sm font-medium text-gray-500 mt-1 tracking-wider uppercase">Feb – Mar 2027</p>
+                      </div>
+                      <div className="md:w-2/3 space-y-3 text-[14px] text-gray-400 font-light leading-relaxed">
+                        <p><strong className="text-gray-200 font-semibold">What we're doing:</strong> Locking in the final hardware and fabric design based on what our pilot testers tell us.</p>
+                        <p><strong className="text-gray-200 font-semibold">Focus:</strong> Setting up our supply chain and kicking off our first real manufacturing run to get the product into users' hands.</p>
+                        <p><strong className="text-gray-200 font-semibold">Grant Usage:</strong> Paying for the manufacturing costs of our first batch (100-500 units) and basic packaging.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+            </motion.div>
+          </motion.main>
+        )}
+
+        {/* 4. MILESTONES PAGE */}
+        {currentPage === 'milestones' && (
+          <motion.main 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-grow flex flex-col justify-center py-12 px-6 md:px-12 lg:px-20 w-full max-w-[1200px] mx-auto relative z-10"
+          >
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="text-center max-w-2xl mx-auto mb-16"
+            >
+              <motion.div variants={fadeUpVariant} className="flex items-center justify-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase mb-4">
+                <Activity className="w-4 h-4" />
+                <span>Our Journey</span>
+              </motion.div>
+              <motion.h2 variants={fadeUpVariant} className="text-4xl md:text-5xl font-bold text-white tracking-tight uppercase">
+                Key Milestones
+              </motion.h2>
+              <motion.p variants={fadeUpVariant} className="mt-6 text-gray-400 font-light leading-relaxed text-[15px] md:text-base">
+                A young startup driven by clear intent
+              </motion.p>
+            </motion.div>
+
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto"
+            >
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-2 p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <h3 className="text-white font-semibold text-lg tracking-wide">BEC84 Angel Fund</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">First pitched in the BEC84 Angel Fund Hackathon and subsequently won a grant from the BEC84 Angel Fund to accelerate our development.</p>
+              </motion.div>
+              
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-2 p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <h3 className="text-white font-semibold text-lg tracking-wide">CBDE Mentorship</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">Selected and mentored under IIEST, Shibpur's CBDE startup program, guided by several academicians, entrepreneurs, investors, and VCs.</p>
+              </motion.div>
+
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-2 p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <h3 className="text-white font-semibold text-lg tracking-wide">IIT Hyderabad</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">Our research proposal was successfully approved and has advanced to the second round of evaluation.</p>
+              </motion.div>
+
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-2 p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <h3 className="text-white font-semibold text-lg tracking-wide">3FVC Engagement</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">Initiated strategic engagement and ongoing discussions with 3FVC to scale our operations.</p>
               </motion.div>
             </motion.div>
           </motion.main>
         )}
 
-        {/* 4. TEAM PAGE */}
+        {/* 5. TEAM PAGE */}
         {currentPage === 'team' && (
           <motion.main 
             initial={{ opacity: 0 }}
@@ -509,31 +637,22 @@ export default function App() {
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto"
             >
               {[
                 { 
                   name: "Sourish Mandal", 
                   role: "Co-Founder & Hardware Lead", 
-                  desc: "Spearheading electrical engineering, advanced circuit design, and the core physical gesture control technology powering the MyoBand.", 
+                  desc: "Spearheading electrical engineering, advanced circuit design, and the core physical Surface Electromyography(sEMG) technology powering the MyoBand.", 
                   image: "/sourish.jpeg",
                   initials: "SM",
                   linkedin: "https://www.linkedin.com/in/sourish-mandal-a81182302?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
                   email: "sourishmandal11work@gmail.com"
                 },
                 { 
-                  name: "Soumili", 
-                  role: "Co-Founder & Software Lead", 
-                  desc: "Driving the intricate software architecture, machine learning models, and real-time biometric data processing pipelines.", 
-                  image: "/soumili.jpeg",
-                  initials: "S",
-                  linkedin: "https://www.linkedin.com/in/soumili-das-3a351a325",
-                  email: "milisoud2005@gmail.com"
-                },
-                { 
-                  name: "Chetan", 
+                  name: "Chetan Barua", 
                   role: "Co-Founder & Mechanical Lead", 
-                  desc: "Leading the physical product development, 3D printing implementation, and ensuring the wearable's modular ergonomics.", 
+                  desc: "Leading the physical product development, 3D printing implementation, and ensuring the wearable's modular ergonomics & mechanical reliability.", 
                   image: "/chetan.png",
                   initials: "C",
                   linkedin: "https://www.linkedin.com/in/chetan-barua-147b6b317?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
@@ -542,7 +661,6 @@ export default function App() {
               ].map((member, index) => (
                 <motion.div key={index} variants={fadeUpVariant} className="group relative flex flex-col p-8 rounded-3xl bg-black/40 border border-white/[0.05] hover:bg-black/60 transition-colors duration-500 backdrop-blur-md">
                   
-                  {/* ATTRACTIVE IMAGE CONTAINER WITH HOVER & CLICK EFFECT */}
                   <div 
                     className="relative w-24 h-24 mb-6 cursor-pointer"
                     onClick={() => setEnlargedImage(member.image)}
@@ -581,7 +699,7 @@ export default function App() {
           </motion.main>
         )}
 
-        {/* 5. CONTACT PAGE */}
+        {/* 6. CONTACT PAGE */}
         {currentPage === 'contact' && (
           <motion.main 
             initial={{ opacity: 0 }}
@@ -596,7 +714,7 @@ export default function App() {
               className="text-center max-w-2xl mx-auto mb-16"
             >
               <motion.div variants={fadeUpVariant} className="flex items-center justify-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase mb-4">
-                <Hexagon className="w-4 h-4" />
+                <img src="/Design_1.png" alt="Contact Icon" className="w-12 h-12 md:w-16 md:h-16 object-contain opacity-80" />
                 <span>Get In Touch</span>
               </motion.div>
               <motion.h2 variants={fadeUpVariant} className="text-4xl md:text-5xl font-bold text-white tracking-tight uppercase">
@@ -613,7 +731,6 @@ export default function App() {
               variants={staggerContainer}
               className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto"
             >
-              {/* Email Card */}
               <motion.div variants={fadeUpVariant} className="flex flex-col items-center text-center gap-4 p-8 md:p-10 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
                 <div className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.1] flex items-center justify-center mb-2">
                   <Mail className="w-6 h-6 text-white" />
@@ -625,7 +742,6 @@ export default function App() {
                 </a>
               </motion.div>
 
-              {/* Phone Card */}
               <motion.div variants={fadeUpVariant} className="flex flex-col items-center text-center gap-4 p-8 md:p-10 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
                 <div className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/[0.1] flex items-center justify-center mb-2">
                   <Phone className="w-6 h-6 text-white" />
@@ -635,7 +751,7 @@ export default function App() {
                 <div className="flex flex-col gap-3 text-gray-300 text-lg font-medium">
                   <a href="tel:+916295192682" className="hover:text-white transition-colors">+91 62951 92682</a>
                   <a href="tel:+916289853234" className="hover:text-white transition-colors">+91 62898 53234</a>
-                  <a href="tel:+919330374529" className="hover:text-white transition-colors">+91 93303 74529</a>
+                  
                 </div>
               </motion.div>
             </motion.div>
@@ -648,7 +764,7 @@ export default function App() {
       <footer className="relative z-50 flex flex-col md:flex-row items-center justify-between px-6 py-8 md:px-12 lg:px-20 w-full text-gray-500 bg-transparent">
         <div className="flex flex-col md:flex-row gap-6 mb-4 md:mb-0 w-full max-w-[1600px] mx-auto justify-between items-center text-center md:text-left">
           <div className="flex gap-6">
-            <a href="https://www.linkedin.com/company/synerksislabs" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-white transition-colors">
+            <a href="https://www.linkedin.com/company/synerksis-labs/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-white transition-colors">
               <Linkedin className="w-5 h-5" />
             </a>
             
