@@ -1,6 +1,78 @@
 import React, { useRef, useId, useEffect, useState } from 'react';
 import { motion, animate, useMotionValue, AnimatePresence } from 'framer-motion';
-import { Linkedin, Mail, Activity, Cpu, Layers, Waves, Box, X, Phone, Menu } from 'lucide-react';
+import { Linkedin, Mail, Activity, Cpu, Layers, Waves, Box, X, Phone, Menu, Calendar, ArrowLeft, ArrowRight, BookOpen, HelpCircle } from 'lucide-react';
+import { client } from './sanityClient';
+import { PortableText } from '@portabletext/react';
+import imageUrlBuilder from '@sanity/image-url'; 
+
+// --- SANITY IMAGE BUILDER & TEXT STYLING SETUP ---
+const builder = imageUrlBuilder(client);
+function urlFor(source) {
+  return builder.image(source);
+}
+
+// These rules tell the blog how to look on your dark theme and prevent crashes
+const myPortableTextComponents = {
+  types: {
+    image: ({ value }) => {
+      // 1. Safe check for empty images
+      if (!value?.asset?._ref) {
+        return null; 
+      }
+      
+      try {
+        // 2. We pass EXACTLY the raw image ID string (value.asset._ref) instead of the complex object
+        const imageUrl = urlFor(value.asset._ref).auto('format').fit('max').width(800).url();
+        return (
+          <img
+            alt={value.alt || 'Blog content image'}
+            loading="lazy"
+            src={imageUrl}
+            className="w-full h-auto rounded-2xl my-8 border border-white/10 drop-shadow-xl"
+          />
+        );
+      } catch (error) {
+        // 3. If it fails, print the ACTUAL error message to the screen so we can read it!
+        return (
+          <div className="p-4 bg-orange-900/40 text-orange-300 rounded-2xl my-8 text-center text-sm border border-orange-500/30 font-medium tracking-wide">
+            ⚠️ Builder Error: {error.message}
+          </div>
+        );
+      }
+    },
+  },
+  block: {
+    normal: ({children}) => <p className="text-gray-300 leading-relaxed font-light mb-6 text-[15px] md:text-base">{children}</p>,
+    h1: ({children}) => <h1 className="text-3xl font-bold text-white mb-6 mt-10 tracking-tight">{children}</h1>,
+    h2: ({children}) => <h2 className="text-2xl font-bold text-white mb-6 mt-10 tracking-tight">{children}</h2>,
+    h3: ({children}) => <h3 className="text-xl font-bold text-white mb-4 mt-8 tracking-wide">{children}</h3>,
+    h4: ({children}) => <h4 className="text-lg font-bold text-white mb-4 mt-8">{children}</h4>,
+    blockquote: ({children}) => <blockquote className="border-l-4 border-gray-500 pl-4 italic text-gray-400 my-6">{children}</blockquote>,
+  },
+  list: {
+    bullet: ({children}) => <ul className="list-disc pl-6 text-gray-300 mb-6 space-y-2 font-light">{children}</ul>,
+    number: ({children}) => <ol className="list-decimal pl-6 text-gray-300 mb-6 space-y-2 font-light">{children}</ol>,
+  },
+  listItem: {
+    bullet: ({children}) => <li className="pl-1 text-gray-300">{children}</li>,
+    number: ({children}) => <li className="pl-1 text-gray-300">{children}</li>,
+  },
+  marks: {
+    strong: ({children}) => <strong className="font-bold text-white">{children}</strong>,
+    em: ({children}) => <em className="italic text-gray-300">{children}</em>,
+    link: ({children, value}) => {
+      // Safe check for empty links
+      const href = value?.href || '#';
+      const rel = !href.startsWith('/') ? 'noreferrer noopener' : undefined;
+      return (
+        <a href={href} rel={rel} target={rel ? "_blank" : undefined} className="text-blue-400 hover:text-blue-300 hover:underline transition-colors">
+          {children}
+        </a>
+      );
+    },
+  },
+};
+// -------------------------------------------------
 
 // =========================================
 // ETHEREAL SHADOW EFFECT COMPONENT
@@ -186,6 +258,33 @@ export default function App() {
   const [enlargedImage, setEnlargedImage] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Blog State
+  const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch Blog Posts from Sanity
+  useEffect(() => {
+    const query = `*[_type == "post"] | order(publishedAt desc) {
+      _id,
+      title,
+      slug,
+      publishedAt,
+      "imageUrl": mainImage.asset->url,
+      body
+    }`;
+
+    client.fetch(query)
+      .then((data) => {
+        setPosts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching blog posts:', err);
+        setLoading(false);
+      });
+  }, []);
+
   const fadeUpVariant = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
@@ -252,9 +351,9 @@ export default function App() {
         >
           <button onClick={() => setCurrentPage('product')} className={`hover:text-white transition-colors ${currentPage === 'product' ? 'text-white font-semibold' : ''}`}>Product</button>
           <button onClick={() => setCurrentPage('mission')} className={`hover:text-white transition-colors ${currentPage === 'mission' ? 'text-white font-semibold' : ''}`}>Mission</button>
-          {/* ADDED MILESTONES TO DESKTOP NAV */}
           <button onClick={() => setCurrentPage('milestones')} className={`hover:text-white transition-colors ${currentPage === 'milestones' ? 'text-white font-semibold' : ''}`}>Milestones</button>
           <button onClick={() => setCurrentPage('team')} className={`hover:text-white transition-colors ${currentPage === 'team' ? 'text-white font-semibold' : ''}`}>Team</button>
+          <button onClick={() => setCurrentPage('blog')} className={`hover:text-white transition-colors ${currentPage === 'blog' ? 'text-white font-semibold' : ''}`}>Blog</button>
           <button onClick={() => setCurrentPage('contact')} className={`hover:text-white transition-colors ${currentPage === 'contact' ? 'text-white font-semibold' : ''}`}>Contact</button>
         </motion.div>
 
@@ -276,8 +375,7 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="absolute top-full left-0 w-full bg-[#050505]/95 backdrop-blur-xl border-b border-white/10 flex flex-col items-center py-8 gap-8 md:hidden shadow-2xl z-40"
             >
-              {/* ADDED MILESTONES TO MOBILE NAV */}
-              {['product', 'mission', 'milestones', 'team', 'contact'].map((page) => (
+              {['product', 'mission', 'milestones', 'team', 'blog', 'contact'].map((page) => (
                 <button 
                   key={page}
                   onClick={() => {
@@ -399,7 +497,7 @@ export default function App() {
                   <div className="flex flex-col gap-2 p-5 rounded-2xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md sm:col-span-2">
                     <Activity className="w-5 h-5 text-white mb-1" />
                     <h3 className="text-white font-semibold text-sm tracking-wide">Athletic Performance</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">Captures intricate muscle activation to optimize form and prevent injuries.</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">Analyzes muscle activation and fatigue to optimize form and prevent injuries.</p>
                   </div>
                 </motion.div>
               </motion.div>
@@ -458,7 +556,7 @@ export default function App() {
                 <div className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md text-left hover:bg-black/60 transition-colors duration-500">
                   <Activity className="w-6 h-6 text-white mb-2" />
                   <h3 className="text-white font-semibold text-lg tracking-wide">Clinical Diagnostics</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">Making the diagnosis and progression tracking of chronic neuromuscular disorders highly accessible, precise, and effortless.</p>
+                  <p className="text-sm text-gray-400 leading-relaxed"> Making the diagnosis and progression tracking of chronic neuromuscular disorders highly accessible, precise, and effortless.</p>
                 </div>
                 
                 <div className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md text-left hover:bg-black/60 transition-colors duration-500">
@@ -484,6 +582,20 @@ export default function App() {
                   </div>
                   <p className="text-[15px] md:text-base text-gray-400 leading-relaxed font-light">
                     The core foundation of the MyoBand has always been neuromuscular rehabilitation, clinical diagnostics, and athletic enhancement. However, this same high fidelity sensing technology provides an exceptional solution for back pain management. Most back pain originates from poor posture and muscular imbalances rather than complex neuromuscular disorders. By continuously tracking muscle fatigue and spinal alignment in real time, the MyoBand acts as a powerful preventative tool. It relies entirely on passive monitoring and precise data collection without using any electrical stimulation. This approach allows users and physical therapists to clearly identify harmful strain patterns and correct them before chronic pain develops.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* What We Are Trying to Prove */}
+              <motion.div variants={fadeUpVariant} className="w-full mt-12 text-left">
+                <div className="flex flex-col gap-4 p-8 rounded-3xl bg-white/[0.02] border border-white/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-white/20"></div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <HelpCircle className="w-6 h-6 text-white" />
+                    <h3 className="text-white font-bold text-xl tracking-wide uppercase">What We Are Trying to Prove</h3>
+                  </div>
+                  <p className="text-[15px] md:text-base text-gray-400 leading-relaxed font-light">
+                    We are proving that your muscles shouldn’t be a black box. Our goal is to demonstrate that clinical-grade neuromuscular data can be captured outside of a lab during dynamic, real-world movement. By making invisible muscle fatigue and synergy breakdowns measurable, we are proving that chronic pain and athletic injuries can be predicted and prevented before they happen.
                   </p>
                 </div>
               </motion.div>
@@ -564,11 +676,12 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="flex-grow flex flex-col justify-center py-12 px-6 md:px-12 lg:px-20 w-full max-w-[1200px] mx-auto relative z-10"
           >
+            {/* Business/Academic Milestones Header */}
             <motion.div 
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="text-center max-w-2xl mx-auto mb-16"
+              className="text-center max-w-2xl mx-auto mb-12"
             >
               <motion.div variants={fadeUpVariant} className="flex items-center justify-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase mb-4">
                 <Activity className="w-4 h-4" />
@@ -582,11 +695,12 @@ export default function App() {
               </motion.p>
             </motion.div>
 
+            {/* Business/Academic Milestones Grid */}
             <motion.div 
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto mb-20"
             >
               <motion.div variants={fadeUpVariant} className="flex flex-col gap-2 p-6 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
                 <h3 className="text-white font-semibold text-lg tracking-wide">BEC84 Angel Fund</h3>
@@ -608,6 +722,55 @@ export default function App() {
                 <p className="text-sm text-gray-400 leading-relaxed">Initiated strategic engagement and ongoing discussions with 3FVC to scale our operations.</p>
               </motion.div>
             </motion.div>
+
+            {/* --- ADDED: Technological De-Risking Section --- */}
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="text-center max-w-2xl mx-auto mb-10"
+            >
+              <motion.div variants={fadeUpVariant} className="flex items-center justify-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase mb-4">
+                <Cpu className="w-4 h-4" />
+                <span>Engineering & Validation</span>
+              </motion.div>
+              <motion.h2 variants={fadeUpVariant} className="text-3xl md:text-4xl font-bold text-white tracking-tight uppercase">
+                Technological De-Risking
+              </motion.h2>
+              <motion.p variants={fadeUpVariant} className="mt-4 text-gray-400 font-light leading-relaxed text-[15px] md:text-base">
+                How our engineering team is de-risking MyoBand for clinical, athletic, and medical use.
+              </motion.p>
+            </motion.div>
+
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto"
+            >
+              {/* Technological Card 1 */}
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <Layers className="w-6 h-6 text-white mb-3" />
+                <h3 className="text-white font-semibold text-lg tracking-wide">The Cross-Disciplinary Reality</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">A perfect schematic means nothing if physical components clash. We spent the week executing precise alignment between our mechanical CAD, flexible fabric structures, and embedded software architecture. Every millimeter of housing directly impacts our data quality.</p>
+              </motion.div>
+
+              {/* Technological Card 2 */}
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <Activity className="w-6 h-6 text-white mb-3" />
+                <h3 className="text-white font-semibold text-lg tracking-wide">Clinical-Grade Data Execution</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">To de-risk our technology for dynamic human movement, we pulled raw sEMG signals directly from our IDE. Analyzing these live signals demonstrated how our custom filter networks successfully isolate true motor unit potentials while aggressively rejecting motion artifacts.</p>
+              </motion.div>
+
+              {/* Technological Card 3 */}
+              <motion.div variants={fadeUpVariant} className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
+                <Waves className="w-6 h-6 text-white mb-3" />
+                <h3 className="text-white font-semibold text-lg tracking-wide">Validating Passive Sensing</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">We proved clinical-grade accuracy can be achieved entirely through passive monitoring. MyoBand relies on pristine coupling and advanced filtering, with absolutely zero reliance on active electrical stimulation.</p>
+              </motion.div>
+            </motion.div>
+            {/* --- END: Technological De-Risking Section --- */}
+
           </motion.main>
         )}
 
@@ -699,7 +862,119 @@ export default function App() {
           </motion.main>
         )}
 
-        {/* 6. CONTACT PAGE */}
+        {/* 6. BLOG PAGE */}
+        {currentPage === 'blog' && (
+          <motion.main 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-grow flex flex-col justify-center py-12 px-6 md:px-12 lg:px-20 w-full max-w-[1400px] mx-auto relative z-10"
+          >
+            {selectedPost ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-3xl mx-auto w-full"
+              >
+                <button 
+                  onClick={() => setSelectedPost(null)}
+                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-8 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to all articles
+                </button>
+
+                {selectedPost.imageUrl && (
+                  <img 
+                    src={selectedPost.imageUrl} 
+                    alt={selectedPost.title} 
+                    className="w-full h-64 md:h-80 object-cover rounded-3xl mb-8 border border-white/10"
+                  />
+                )}
+
+                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gray-500 mb-3">
+                  <Calendar className="w-4 h-4" />
+                  {selectedPost.publishedAt ? new Date(selectedPost.publishedAt).toLocaleDateString() : 'Recent'}
+                </div>
+
+                <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight uppercase mb-8 leading-tight">
+                  {selectedPost.title}
+                </h1>
+
+                <div className="max-w-none w-full pb-20">
+                  <PortableText value={selectedPost.body || []} components={myPortableTextComponents} />
+                </div>
+              </motion.div>
+            ) : (
+              <>
+                <motion.div 
+                  initial="hidden"
+                  animate="visible"
+                  variants={staggerContainer}
+                  className="text-center max-w-2xl mx-auto mb-16"
+                >
+                  <motion.div variants={fadeUpVariant} className="flex items-center justify-center gap-3 text-gray-400 font-medium tracking-widest text-[11px] uppercase mb-4">
+                    <BookOpen className="w-4 h-4" />
+                    <span>Research & Insights</span>
+                  </motion.div>
+                  <motion.h2 variants={fadeUpVariant} className="text-4xl md:text-5xl font-bold text-white tracking-tight uppercase">
+                    Latest Publications
+                  </motion.h2>
+                  <motion.p variants={fadeUpVariant} className="mt-6 text-gray-400 font-light leading-relaxed text-[15px] md:text-base">
+                    Updates, clinical research findings, and technical deep-dives from the SYNERKSIS LABS engineering team.
+                  </motion.p>
+                </motion.div>
+
+                {loading ? (
+                  <div className="text-center text-gray-500 py-16">Loading publications...</div>
+                ) : posts.length === 0 ? (
+                  <div className="text-center text-gray-500 py-16">No publications found. Add your first post in Sanity Studio!</div>
+                ) : (
+                  <motion.div 
+                    initial="hidden"
+                    animate="visible"
+                    variants={staggerContainer}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full"
+                  >
+                    {posts.map((post) => (
+                      <motion.div 
+                        key={post._id} 
+                        variants={fadeUpVariant}
+                        onClick={() => setSelectedPost(post)}
+                        className="group cursor-pointer flex flex-col p-6 rounded-3xl bg-black/40 border border-white/[0.05] hover:bg-black/60 transition-colors duration-500 backdrop-blur-md"
+                      >
+                        {post.imageUrl && (
+                          <div className="w-full h-48 rounded-2xl overflow-hidden mb-5 border border-white/[0.08]">
+                            <img 
+                              src={post.imageUrl} 
+                              alt={post.title} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gray-500 mb-2">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recent'}
+                        </div>
+
+                        <h3 className="text-xl font-bold text-white tracking-wide mb-3 group-hover:text-gray-300 transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+
+                        <div className="flex items-center gap-2 text-sm text-white/80 font-medium mt-auto pt-4">
+                          <span>Read article</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </>
+            )}
+          </motion.main>
+        )}
+
+        {/* 7. CONTACT PAGE */}
         {currentPage === 'contact' && (
           <motion.main 
             initial={{ opacity: 0 }}
@@ -774,7 +1049,7 @@ export default function App() {
 
           </div>
           <div className="text-[13px] leading-relaxed tracking-wide">
-            <p>© 2026 Synerksis LABS</p>
+            <p>© 2026 SYNERKSIS LABS Private Limited</p>
             <p>Based in Kolkata, India</p>
           </div>
         </div>
