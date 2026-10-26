@@ -766,7 +766,7 @@ export default function App() {
               <motion.div variants={fadeUpVariant} className="flex flex-col gap-3 p-8 rounded-3xl bg-black/40 border border-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md hover:bg-black/60 transition-colors duration-500">
                 <Waves className="w-6 h-6 text-white mb-3" />
                 <h3 className="text-white font-semibold text-lg tracking-wide">Validating Passive Sensing</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">We proved clinical-grade accuracy can be achieved entirely through passive monitoring. MyoBand relies on pristine coupling and advanced filtering, with absolutely zero reliance on active electrical stimulation.</p>
+                <p className="text-sm text-gray-400 leading-relaxed">We proved that high-fidelity signal precision can be achieved entirely through passive monitoring. MyoBand relies on pristine coupling and advanced filtering, with absolutely zero reliance on active electrical stimulation.</p>
               </motion.div>
             </motion.div>
             {/* --- END: Technological De-Risking Section --- */}
